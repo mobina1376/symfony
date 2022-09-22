@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 
@@ -15,12 +16,14 @@ class BlogController extends AbstractController
 
 
     #[Route('/blog/add', name: 'app_blog',methods:['POST'])]
-    public function add(string $tiitle,string $body ,ManagerRegistry  $doctrine) 
+    public function add(ManagerRegistry  $doctrine,Request $request) 
     {
           $entityManager  = $doctrine->getManager();
+          $title = $request->get('title');
+          $body = $request->get('body');
           
         $blog = new Blog();
-        $blog->setTitle($tiitle);
+        $blog->setTitle($title);
         $blog->setBody($body);
 
       
