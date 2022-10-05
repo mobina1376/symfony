@@ -10,12 +10,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-
 class BlogController extends AbstractController
 {
-
-
-    #[Route('/blog/add', name: 'app_blog',methods:['POST'])]
+    #[Route('/posts/add', name: 'posts_add',methods:['POST'])]
     public function add(ManagerRegistry  $doctrine,Request $request) 
     {
           $entityManager  = $doctrine->getManager();
@@ -25,45 +22,41 @@ class BlogController extends AbstractController
         $blog = new Blog();
         $blog->setTitle($title);
         $blog->setBody($body);
-
-      
         $entityManager->persist($blog);
-        
         $entityManager->flush();
 
-        return new JsonResponse('Saved new product with id ');
-   
-      
+        return new JsonResponse(
+              [
+                'status' => 'true',
+                'message' => 'saved',
+              ]
+        );
     }
 
 
-    #[Route('/blog/show/{blog}', name: 'app_blog_show',methods: ['GET'])]
-    public function show(Blog $blog,EntityManagerInterface $entityManage)
+    #[Route('/posts/{postid}', name: 'posts_show',methods: ['GET'])]
+    public function show(int $postId,ManagerRegistry  $doctrine)
     {
-        
-          $repository = $entityManage->getRepository(Blog::class);
-         $service = $repository->findOneBy(['blog' => $blog]);
-         
-         //dd($service);
+         $repository = $doctrine->getRepository(Blog::class);
+         $blog = $repository->find($postId);
 
-        return [
+        return  new JsonResponse([
            'title' => $blog->getId(),
            'body' => $blog ->getBody(),
-        
-        ];
-                   
+        ]);             
     }
 
-    #[Route('/blog/delete/{id}', name: 'app_blog_delete',methods: ['GET'])]
-    public function delete($id,ManagerRegistry  $doctrine){
-        $entityManager  = $doctrine->getManager();
-       $service = $doctrine->getRepository(Blog::class);
-      $eml = $service->find($id);
-      $entityManager->remove($eml);
+    #[Route('/posts/{postid}/delete', name: 'posts_delete',methods: ['GET'])]
+    public function delete(int $postid,ManagerRegistry  $doctrine)
+    {
+      $entityManager  = $doctrine->getManager();
+      $repository = $doctrine->getRepository(Blog::class);
+      $blog = $repository->find($postid);
+      $entityManager->remove($blog);
       $entityManager->flush();
-        return new JsonResponse('deleted');
+        return new JsonResponse([
+            'status' => true,
+            'mesage' => 'deleted',
+        ]);
     }
-
-
- 
 }
